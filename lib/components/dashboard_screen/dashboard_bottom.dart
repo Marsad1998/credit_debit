@@ -1,35 +1,26 @@
-import 'package:credit_debit/components/customer/transaction_state.dart';
-import 'package:credit_debit/models/transactions.dart';
-import 'package:credit_debit/screens/add_transaction.dart';
+import 'package:credit_debit/components/customer_screen/transaction_state.dart';
+import 'package:credit_debit/components/dashboard_screen/add_customer.dart';
 import 'package:credit_debit/widgets/summary_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:credit_debit/constants.dart';
 import 'package:provider/provider.dart';
 
-class CustomerBottom extends StatefulWidget {
-  const CustomerBottom({
+class DashboardBottom extends StatefulWidget {
+  const DashboardBottom({
     super.key,
     required this.parentContext,
-    required this.customer,
   });
 
   final BuildContext parentContext;
-  final Map<String, dynamic> customer;
 
   @override
-  State<CustomerBottom> createState() => _CustomerBottomState();
+  State<DashboardBottom> createState() => _DashboardBottomState();
 }
 
-class _CustomerBottomState extends State<CustomerBottom> {
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<TransactionData>(context, listen: false)
-        .refreshBalance(widget.customer['id']);
-  }
-
+class _DashboardBottomState extends State<DashboardBottom> {
   @override
   Widget build(BuildContext context) {
+    Provider.of<TransactionData>(context, listen: false).refreshBalance(null);
     return Container(
       color: kScaffoldColor,
       child: Column(
@@ -42,24 +33,18 @@ class _CustomerBottomState extends State<CustomerBottom> {
                   child: Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (builder) => AddTransaction(
-                                customer: widget.customer, type: 'Received'),
-                          ),
-                        );
-                      },
+                      onPressed: () {},
                       style: kDefaultButton.copyWith(
-                        backgroundColor: const WidgetStatePropertyAll(
-                          Colors.green,
+                        foregroundColor:
+                            WidgetStatePropertyAll(Colors.blue[900]),
+                        backgroundColor: WidgetStatePropertyAll(
+                          Colors.lightBlue[100],
                         ),
-                        shadowColor: const WidgetStatePropertyAll(
-                          Colors.green,
+                        shadowColor: WidgetStatePropertyAll(
+                          Colors.lightBlue[100],
                         ),
                       ),
-                      child: const Text('You Received'),
+                      child: const Text('Transactions'),
                     ),
                   ),
                 ),
@@ -67,24 +52,22 @@ class _CustomerBottomState extends State<CustomerBottom> {
                   child: Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: TextButton(
-                      style: kDefaultButton.copyWith(
-                        backgroundColor: const WidgetStatePropertyAll(
-                          Colors.redAccent,
-                        ),
-                        shadowColor: WidgetStatePropertyAll(
-                          Colors.redAccent[100],
-                        ),
-                      ),
+                      style: kDefaultButton,
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (builder) => AddTransaction(
-                                customer: widget.customer, type: 'Paid'),
+                        showModalBottomSheet(
+                          context: widget.parentContext,
+                          builder: (builder) => Container(
+                            padding: EdgeInsets.only(
+                                bottom: MediaQuery.of(widget.parentContext)
+                                    .viewInsets
+                                    .bottom),
+                            child: const SingleChildScrollView(
+                              child: AddCustomer(),
+                            ),
                           ),
                         );
                       },
-                      child: const Text('You Paid'),
+                      child: const Text('Add Customers'),
                     ),
                   ),
                 )
@@ -115,8 +98,6 @@ class _CustomerBottomState extends State<CustomerBottom> {
                         label: 'Balance',
                         amount: transData.totalBalance.toStringAsFixed(2),
                         colour: Colors.black,
-                        txtcolour:
-                            Transactions.balanceColor(transData.totalBalance),
                       ),
                     ),
                   ],

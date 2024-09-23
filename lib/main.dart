@@ -1,9 +1,9 @@
-import 'package:credit_debit/components/customer/transaction_state.dart';
-import 'package:credit_debit/components/dashboard/customer_state.dart';
-import 'package:credit_debit/constants.dart';
-import 'package:credit_debit/screens/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:credit_debit/router.dart';
+import 'package:credit_debit/constants.dart';
+import 'package:credit_debit/components/dashboard_screen/customer_state.dart';
+import 'package:credit_debit/components/customer_screen/transaction_state.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CustomerData()),
         ChangeNotifierProvider(create: (_) => TransactionData()),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        home: const DashboardScreen(title: 'Credit Debit'),
+        routerConfig: MyRoutes.routes,
       ),
     );
   }

@@ -1,10 +1,11 @@
-import 'package:credit_debit/components/customer/transaction_state.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:credit_debit/constants.dart';
 import 'package:credit_debit/widgets/trans_field.dart';
 import 'package:credit_debit/models/transactions.dart';
+import 'package:credit_debit/components/customer_screen/transaction_state.dart';
 import 'package:credit_debit/widgets/my_date_picker.dart';
-import 'package:provider/provider.dart';
 
 class AddTransaction extends StatefulWidget {
   const AddTransaction(
@@ -13,8 +14,9 @@ class AddTransaction extends StatefulWidget {
       required this.type,
       this.transaction});
 
-  final Map<String, dynamic> customer;
   final String type;
+  static String id = 'transaction_screen';
+  final Map<String, dynamic> customer;
   final Map<String, dynamic>? transaction;
 
   @override
@@ -39,6 +41,8 @@ class _AddTransactionState extends State<AddTransaction> {
     double? paidA = widget.transaction?['paid'];
     double? receivedA = widget.transaction?['received'];
     String? notes = widget.transaction?['note'];
+    final transDataProvider =
+        Provider.of<TransactionData>(context, listen: false);
 
     TextEditingController amountController = TextEditingController(
       text: (paidA != null && paidA > 0)
@@ -48,7 +52,7 @@ class _AddTransactionState extends State<AddTransaction> {
     TextEditingController noteController = TextEditingController(
       text: (notes != null && notes.isNotEmpty) ? notes : '',
     );
-    return Consumer(
+    return Consumer<TransactionData>(
       builder: (builder, transData, child) {
         return Scaffold(
           backgroundColor: kScaffoldColor,
@@ -60,15 +64,15 @@ class _AddTransactionState extends State<AddTransaction> {
               if (widget.transaction != null)
                 IconButton(
                   onPressed: () async {
-                    final data = await Transactions.deleteTransaction(
+                    await Transactions.deleteTransaction(
                         widget.transaction?['id']);
 
-                    await Provider.of<TransactionData>(context, listen: false)
+                    transDataProvider
                         .refreshTransactions(widget.customer['id']);
+                    transDataProvider.refreshBalance(widget.customer['id']);
 
-                    await Provider.of<TransactionData>(context, listen: false)
-                        .refreshBalance(widget.customer['id']);
-                    Navigator.pop(context);
+                    if (!context.mounted) return; // ver important
+                    context.pop();
                   },
                   icon: const Icon(Icons.delete),
                 ),
@@ -96,7 +100,7 @@ class _AddTransactionState extends State<AddTransaction> {
                             style: kH2,
                           ),
                           Text(
-                            'transData1600',
+                            transData.totalBalance.toStringAsFixed(2),
                             style: kH2.copyWith(color: Colors.red),
                           ),
                         ],
@@ -158,28 +162,6 @@ class _AddTransactionState extends State<AddTransaction> {
                           double? amount =
                               double.tryParse(amountController.text);
                           if (_formKey.currentState!.validate()) {
-                            // if (widget.type == 'Paid') {
-                            //   if (widget.transaction == null) {
-                            //     await Transactions.createTransaction(
-                            //       customerId: widget.customer['id'],
-                            //       paid: amount,
-                            //       received: 0,
-                            //       note: noteController.text,
-                            //       dueDate: _dueDate.toString(),
-                            //       date: _todate.toString(),
-                            //     );
-                            //   } else {
-                            //     await Transactions.updateTransaction(
-                            //       id: widget.transaction?['id'],
-                            //       customerId: widget.customer['id'],
-                            //       paid: amount,
-                            //       received: 0,
-                            //       note: noteController.text,
-                            //       dueDate: _dueDate.toString(),
-                            //       date: _todate.toString(),
-                            //     );
-                            //   }
-                            // } else {
                             if (widget.transaction == null) {
                               await Transactions.createTransaction(
                                 customerId: widget.customer['id'],
@@ -202,16 +184,15 @@ class _AddTransactionState extends State<AddTransaction> {
                                 date: _todate.toString(),
                               );
                             }
-                            // }
-                            await Provider.of<TransactionData>(context,
-                                    listen: false)
+
+                            transDataProvider
                                 .refreshTransactions(widget.customer['id']);
 
-                            await Provider.of<TransactionData>(context,
-                                    listen: false)
+                            transDataProvider
                                 .refreshBalance(widget.customer['id']);
 
-                            Navigator.pop(context);
+                            if (!context.mounted) return; // ver important
+                            context.pop();
                           }
                         },
                         style: kDefaultButton,

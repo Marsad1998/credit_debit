@@ -1,6 +1,5 @@
-import 'package:credit_debit/components/dashboard/customer_state.dart';
+import 'package:credit_debit/components/dashboard_screen/customer_state.dart';
 import 'package:credit_debit/constants.dart';
-import 'package:credit_debit/db_connect.dart';
 import 'package:credit_debit/models/customers.dart';
 import 'package:credit_debit/widgets/trans_field.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +22,8 @@ class AddCustomer extends StatelessWidget {
       text: customer != null ? customer!['phone'] : '',
     );
     final _formKey = GlobalKey<FormState>();
+
+    final customerData = Provider.of<CustomerData>(context, listen: false);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -65,9 +66,8 @@ class AddCustomer extends StatelessWidget {
                         nameController.text, phoneController.text);
                   }
 
-                  Provider.of<CustomerData>(context, listen: false)
-                      .refreshCustomers();
-
+                  customerData.refreshCustomers();
+                  if (!context.mounted) return; // ver important
                   Navigator.pop(context);
                 }
               },

@@ -1,11 +1,10 @@
-import 'package:credit_debit/constants.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:credit_debit/models/transactions.dart';
 import 'package:credit_debit/screens/add_transaction.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:credit_debit/components/customer/transaction_state.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:credit_debit/components/customer_screen/transaction_state.dart';
 
 class ShowTransactions extends StatefulWidget {
   const ShowTransactions({
@@ -20,13 +19,6 @@ class ShowTransactions extends StatefulWidget {
 }
 
 class _ShowTransactionsState extends State<ShowTransactions> {
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<TransactionData>(context, listen: false)
-        .refreshTransactions(widget.customer['id']);
-  }
-
   double balance = 0;
   double totalPaid = 0;
   double totalReceived = 0;
@@ -39,6 +31,8 @@ class _ShowTransactionsState extends State<ShowTransactions> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<TransactionData>(context, listen: false)
+        .refreshTransactions(widget.customer['id']);
     return Consumer<TransactionData>(
       builder: (context, transData, child) {
         balance = 0;
@@ -97,15 +91,24 @@ class _ShowTransactionsState extends State<ShowTransactions> {
                       calculateBalance(trans['paid'], trans['received']);
                   return InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (builder) => AddTransaction(
-                            customer: widget.customer,
-                            transaction: transData.transaction[index],
-                            type: trans['received'] > 0 ? 'Received' : 'Paid',
-                          ),
-                        ),
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (builder) => AddTransaction(
+                      //       customer: widget.customer,
+                      //       transaction: transData.transaction[index],
+                      //       type: trans['received'] > 0 ? 'Received' : 'Paid',
+                      //     ),
+                      //   ),
+                      // );
+
+                      context.pushNamed(
+                        AddTransaction.id,
+                        extra: {
+                          'customer': widget.customer,
+                          'transaction': transData.transaction[index],
+                          'type': trans['received'] > 0 ? 'Received' : 'Paid',
+                        },
                       );
                     },
                     child: Container(

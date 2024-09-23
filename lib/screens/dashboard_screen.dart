@@ -1,6 +1,5 @@
-import 'package:credit_debit/components/dashboard/customer_state.dart';
-import 'package:credit_debit/components/dashboard/dashboard_bottom.dart';
-import 'package:credit_debit/components/dashboard/show_customer.dart';
+import 'package:credit_debit/components/dashboard_screen/dashboard_bottom.dart';
+import 'package:credit_debit/components/dashboard_screen/show_customer.dart';
 import 'package:flutter/material.dart';
 import 'package:credit_debit/constants.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +8,7 @@ class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key, required this.title});
 
   final String title;
+  static String id = 'dashboard_screen';
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
