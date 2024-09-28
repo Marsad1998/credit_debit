@@ -1,10 +1,13 @@
+import 'package:credit_debit/models/transactions.dart';
+import 'package:credit_debit/utils/notification.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:credit_debit/constants.dart';
+import 'package:credit_debit/utils/constants.dart';
 import 'package:credit_debit/widgets/trans_field.dart';
-import 'package:credit_debit/models/transactions.dart';
-import 'package:credit_debit/components/customer_screen/transaction_state.dart';
+import 'package:credit_debit/services/transaction_services.dart';
+import 'package:credit_debit/viewmodels/transaction_state.dart';
 import 'package:credit_debit/widgets/my_date_picker.dart';
 
 class AddTransaction extends StatefulWidget {
@@ -24,35 +27,54 @@ class AddTransaction extends StatefulWidget {
 }
 
 class _AddTransactionState extends State<AddTransaction> {
+  final _formKey = GlobalKey<FormState>();
   DateTime _todate = DateTime.now();
   DateTime _dueDate = DateTime.now();
-
-  final _formKey = GlobalKey<FormState>();
+  late TextEditingController amountController;
+  late TextEditingController noteController;
 
   @override
   void initState() {
     super.initState();
-    Provider.of<TransactionData>(context, listen: false)
-        .refreshBalance(widget.customer['id']);
-  }
 
-  @override
-  Widget build(BuildContext context) {
+    Provider.of<TransactionState>(context, listen: false)
+        .refreshBalance(widget.customer['id']);
+
+    if (widget.transaction != null) {
+      _todate = (widget.transaction?['date'] != null
+          ? DateTime.tryParse(widget.transaction!['date'])
+          : DateTime.now())!;
+      _dueDate = (widget.transaction?['dueDate'] != null
+          ? DateTime.tryParse(widget.transaction!['dueDate'])
+          : DateTime.now())!;
+    }
+
+    // Initialize the controllers here
     double? paidA = widget.transaction?['paid'];
     double? receivedA = widget.transaction?['received'];
     String? notes = widget.transaction?['note'];
-    final transDataProvider =
-        Provider.of<TransactionData>(context, listen: false);
 
-    TextEditingController amountController = TextEditingController(
+    amountController = TextEditingController(
       text: (paidA != null && paidA > 0)
           ? paidA.toStringAsFixed(2)
           : (receivedA != null ? receivedA.toStringAsFixed(2) : ''),
     );
-    TextEditingController noteController = TextEditingController(
+
+    noteController = TextEditingController(
       text: (notes != null && notes.isNotEmpty) ? notes : '',
     );
-    return Consumer<TransactionData>(
+  }
+
+  void reloadProvider() {
+    final transDataProvider =
+        Provider.of<TransactionState>(context, listen: false);
+    transDataProvider.refreshTransactions(widget.customer['id']);
+    transDataProvider.refreshBalance(widget.customer['id']);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<TransactionState>(
       builder: (builder, transData, child) {
         return Scaffold(
           backgroundColor: kScaffoldColor,
@@ -64,14 +86,10 @@ class _AddTransactionState extends State<AddTransaction> {
               if (widget.transaction != null)
                 IconButton(
                   onPressed: () async {
-                    await Transactions.deleteTransaction(
+                    await TransactionService.deleteTransaction(
                         widget.transaction?['id']);
-
-                    transDataProvider
-                        .refreshTransactions(widget.customer['id']);
-                    transDataProvider.refreshBalance(widget.customer['id']);
-
-                    if (!context.mounted) return; // ver important
+                    reloadProvider();
+                    if (!context.mounted) return; // very important
                     context.pop();
                   },
                   icon: const Icon(Icons.delete),
@@ -100,7 +118,9 @@ class _AddTransactionState extends State<AddTransaction> {
                             style: kH2,
                           ),
                           Text(
-                            transData.totalBalance.toStringAsFixed(2),
+                            transData
+                                .totalBalanceF(widget.customer['id'])
+                                .toStringAsFixed(2),
                             style: kH2.copyWith(color: Colors.red),
                           ),
                         ],
@@ -112,6 +132,11 @@ class _AddTransactionState extends State<AddTransaction> {
                         icon: const Icon(Icons.attach_money),
                         controller: amountController,
                         keyBoardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\-?\d+\.?\d*'),
+                          ), // Allow integers and decimals, including negative values
+                        ],
                         callBackFunction: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Amount Field is required';
@@ -163,35 +188,34 @@ class _AddTransactionState extends State<AddTransaction> {
                               double.tryParse(amountController.text);
                           if (_formKey.currentState!.validate()) {
                             if (widget.transaction == null) {
-                              await Transactions.createTransaction(
-                                customerId: widget.customer['id'],
-                                paid: widget.type == 'Paid' ? amount : 0,
+                              Transaction trans = Transaction(
+                                paid: widget.type == 'Paid' ? amount! : 0,
                                 received:
-                                    widget.type == 'Received' ? amount : 0,
-                                note: noteController.text,
+                                    widget.type == 'Received' ? amount! : 0,
                                 dueDate: _dueDate.toString(),
                                 date: _todate.toString(),
+                                customerId: widget.customer['id'],
+                                note: noteController.text,
                               );
+                              await TransactionService.createTransaction(trans);
                             } else {
-                              await Transactions.updateTransaction(
-                                id: widget.transaction?['id'],
-                                customerId: widget.customer['id'],
-                                paid: widget.type == 'Paid' ? amount : 0,
+                              Transaction trans = Transaction(
+                                paid: widget.type == 'Paid' ? amount! : 0,
                                 received:
-                                    widget.type == 'Received' ? amount : 0,
-                                note: noteController.text,
+                                    widget.type == 'Received' ? amount! : 0,
                                 dueDate: _dueDate.toString(),
                                 date: _todate.toString(),
+                                customerId: widget.customer['id'],
+                                note: noteController.text,
+                                id: widget.transaction?['id'],
                               );
+                              await TransactionService.updateTransaction(trans);
                             }
 
-                            transDataProvider
-                                .refreshTransactions(widget.customer['id']);
-
-                            transDataProvider
-                                .refreshBalance(widget.customer['id']);
-
-                            if (!context.mounted) return; // ver important
+                            reloadProvider();
+                            if (!context.mounted) return; // very important
+                            Notifications.showNotification(
+                                context, 'Transaction Saved Successfully');
                             context.pop();
                           }
                         },

@@ -1,10 +1,10 @@
+import 'package:credit_debit/models/transactions.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:credit_debit/models/transactions.dart';
-import 'package:credit_debit/screens/add_transaction.dart';
-import 'package:credit_debit/components/customer_screen/transaction_state.dart';
+import 'package:credit_debit/views/add_transaction.dart';
+import 'package:credit_debit/viewmodels/transaction_state.dart';
 
 class ShowTransactions extends StatefulWidget {
   const ShowTransactions({
@@ -30,10 +30,16 @@ class _ShowTransactionsState extends State<ShowTransactions> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    Provider.of<TransactionData>(context, listen: false)
+  void initState() {
+    super.initState();
+
+    Provider.of<TransactionState>(context, listen: false)
         .refreshTransactions(widget.customer['id']);
-    return Consumer<TransactionData>(
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<TransactionState>(
       builder: (context, transData, child) {
         balance = 0;
         return Column(
@@ -83,7 +89,7 @@ class _ShowTransactionsState extends State<ShowTransactions> {
                 scrollDirection: Axis.vertical,
                 itemBuilder: (builder, index) {
                   final trans = transData.transaction[index];
-                  final DateTime createdAt = DateTime.parse(trans['createdAt']);
+                  final DateTime createdAt = DateTime.parse(trans['date']);
                   final String formattedDate =
                       DateFormat('dd MMMM yyyy EEEE (h:mm a)')
                           .format(createdAt);
@@ -91,17 +97,6 @@ class _ShowTransactionsState extends State<ShowTransactions> {
                       calculateBalance(trans['paid'], trans['received']);
                   return InkWell(
                     onTap: () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (builder) => AddTransaction(
-                      //       customer: widget.customer,
-                      //       transaction: transData.transaction[index],
-                      //       type: trans['received'] > 0 ? 'Received' : 'Paid',
-                      //     ),
-                      //   ),
-                      // );
-
                       context.pushNamed(
                         AddTransaction.id,
                         extra: {
@@ -149,7 +144,7 @@ class _ShowTransactionsState extends State<ShowTransactions> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color:
-                                        Transactions.balanceColor(totalBalance),
+                                        Transaction.balanceColor(totalBalance),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),

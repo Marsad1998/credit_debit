@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:credit_debit/constants.dart';
-import 'package:credit_debit/models/customers.dart';
-import 'package:credit_debit/screens/customer_screen.dart';
+import 'package:credit_debit/utils/constants.dart';
+import 'package:credit_debit/services/customer_services.dart';
+import 'package:credit_debit/services/transaction_services.dart';
+import 'package:credit_debit/views/customer_screen.dart';
 import 'package:credit_debit/components/dashboard_screen/add_customer.dart';
-import 'package:credit_debit/components/dashboard_screen/customer_state.dart';
+import 'package:credit_debit/viewmodels/customer_state.dart';
+import 'package:credit_debit/viewmodels/transaction_state.dart';
 
 class ShowCustomers extends StatefulWidget {
   const ShowCustomers({
@@ -20,29 +22,27 @@ class ShowCustomers extends StatefulWidget {
 }
 
 class _ShowCustomersState extends State<ShowCustomers> {
+  // Map<int, double> customerBalances = {};
+
   @override
   void initState() {
     super.initState();
-    Provider.of<CustomerData>(context, listen: false).refreshCustomers();
+    Provider.of<CustomerState>(context, listen: false).refreshCustomers();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CustomerData>(
+    return Consumer<CustomerState>(
       builder: (context, customerData, child) {
         return ListView.builder(
           itemCount: customerData.customers.length,
           scrollDirection: Axis.vertical,
           itemBuilder: (builder, index) {
             final customer = customerData.customers[index];
-            // return FutureBuilder<List<Map<String, Object?>>>(
-            //   future: Transactions.getTransactionSums(customer['id']),
-            //   builder: (context, snapshot) {
-            //     final customerAmount = snapshot.data;
-            // double totalPaid =
-            //     (customerAmount?[0]['total_paid'] as double?) ?? 0.0;
-            // double totalReceived =
-            //     (customerAmount?[0]['total_received'] as double?) ?? 0.0;
+
+            Provider.of<TransactionState>(context, listen: false)
+                .refreshBalance(customer['id']);
+
             return Container(
               padding: const EdgeInsets.symmetric(vertical: 2.5),
               child: ListTile(
@@ -77,7 +77,7 @@ class _ShowCustomersState extends State<ShowCustomers> {
                                     .bottom,
                               ),
                               child: CustomerActions(
-                                  widget: widget, customer: customer),
+                                  widget: widget, dbCustomer: customer),
                             );
                           },
                           shape: RoundedRectangleBorder(
@@ -86,13 +86,17 @@ class _ShowCustomersState extends State<ShowCustomers> {
                         );
                       },
                     ),
-                    Text(
-                      (2 - 3).toString(),
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
-                      ),
+                    Consumer<TransactionState>(
+                      builder: (context, transData, child) {
+                        return Text(
+                          transData.totalBalanceF(customer['id']).toString(),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.0,
+                          ),
+                        );
+                      },
                     )
                   ],
                 ),
@@ -109,15 +113,15 @@ class CustomerActions extends StatelessWidget {
   const CustomerActions({
     super.key,
     required this.widget,
-    required this.customer,
+    required this.dbCustomer,
   });
 
-  final Map<String, dynamic> customer;
+  final Map<String, dynamic> dbCustomer;
   final ShowCustomers widget;
 
   @override
   Widget build(BuildContext context) {
-    final customerData = Provider.of<CustomerData>(context, listen: false);
+    final customerData = Provider.of<CustomerState>(context, listen: false);
 
     return ListView(
       children: [
@@ -130,13 +134,14 @@ class CustomerActions extends StatelessWidget {
             Navigator.pop(context);
 
             showModalBottomSheet(
+              isScrollControlled: true,
               context: widget.parentContext,
               builder: (builder) => Container(
                 padding: EdgeInsets.only(
                     bottom:
                         MediaQuery.of(widget.parentContext).viewInsets.bottom),
                 child: SingleChildScrollView(
-                  child: AddCustomer(customer: customer),
+                  child: AddCustomer(dbCustomer: dbCustomer),
                 ),
               ),
             );
@@ -148,9 +153,13 @@ class CustomerActions extends StatelessWidget {
           leading: const Icon(Icons.delete),
           tileColor: kScaffoldColor,
           onTap: () async {
-            await Customers.deleteItem(customer['id']);
+            await CustomerService.deleteCustomer(dbCustomer['id']);
+            await TransactionService.deleteCustomerTransaction(
+                dbCustomer['id']);
             customerData.refreshCustomers();
             if (!context.mounted) return; // ver important
+            Provider.of<TransactionState>(context, listen: false)
+                .refreshBalance(null);
             context.pop();
           },
         ),

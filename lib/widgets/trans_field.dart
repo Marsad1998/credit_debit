@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TransField extends StatelessWidget {
-  const TransField(
-      {super.key,
-      required this.label,
-      required this.icon,
-      required this.controller,
-      this.minL,
-      this.callBackFunction,
-      this.keyBoardType,
-      this.autofocus = false});
+  const TransField({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.controller,
+    this.minL,
+    this.callBackFunction,
+    this.keyBoardType,
+    this.autofocus = false,
+    this.inputFormatters,
+  });
 
   final String label;
   final Icon icon;
@@ -18,6 +21,7 @@ class TransField extends StatelessWidget {
   final FormFieldValidator? callBackFunction;
   final TextInputType? keyBoardType;
   final bool autofocus;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +35,7 @@ class TransField extends StatelessWidget {
         keyboardType: keyBoardType,
         controller: controller,
         validator: callBackFunction,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           label: Text(
             label,

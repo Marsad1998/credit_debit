@@ -1,10 +1,10 @@
-import 'package:credit_debit/components/customer_screen/transaction_state.dart';
-import 'package:credit_debit/models/transactions.dart';
-import 'package:credit_debit/screens/add_transaction.dart';
-import 'package:credit_debit/widgets/summary_buttons.dart';
 import 'package:flutter/material.dart';
-import 'package:credit_debit/constants.dart';
 import 'package:provider/provider.dart';
+import 'package:credit_debit/utils/constants.dart';
+import 'package:credit_debit/models/transactions.dart';
+import 'package:credit_debit/views/add_transaction.dart';
+import 'package:credit_debit/widgets/summary_buttons.dart';
+import 'package:credit_debit/viewmodels/transaction_state.dart';
 
 class CustomerBottom extends StatefulWidget {
   const CustomerBottom({
@@ -24,7 +24,7 @@ class _CustomerBottomState extends State<CustomerBottom> {
   @override
   void initState() {
     super.initState();
-    Provider.of<TransactionData>(context, listen: false)
+    Provider.of<TransactionState>(context, listen: false)
         .refreshBalance(widget.customer['id']);
   }
 
@@ -91,7 +91,7 @@ class _CustomerBottomState extends State<CustomerBottom> {
               ],
             ),
           ),
-          Consumer<TransactionData>(
+          Consumer<TransactionState>(
             builder: (builder, transData, child) {
               return Expanded(
                 child: Row(
@@ -99,24 +99,30 @@ class _CustomerBottomState extends State<CustomerBottom> {
                     Expanded(
                       child: SummaryDiv(
                         label: 'Paid',
-                        amount: transData.totalPaid.toStringAsFixed(2),
+                        amount: transData
+                            .totalPaidF(widget.customer['id'])
+                            .toStringAsFixed(2),
                         colour: Colors.red,
                       ),
                     ),
                     Expanded(
                       child: SummaryDiv(
                         label: 'Received',
-                        amount: transData.totalReceived.toStringAsFixed(2),
+                        amount: transData
+                            .totalReceivedF(widget.customer['id'])
+                            .toStringAsFixed(2),
                         colour: Colors.green,
                       ),
                     ),
                     Expanded(
                       child: SummaryDiv(
                         label: 'Balance',
-                        amount: transData.totalBalance.toStringAsFixed(2),
+                        amount: transData
+                            .totalBalanceF(widget.customer['id'])
+                            .toStringAsFixed(2),
                         colour: Colors.black,
-                        txtcolour:
-                            Transactions.balanceColor(transData.totalBalance),
+                        txtcolour: Transaction.balanceColor(
+                            transData.totalBalanceF(widget.customer['id'])),
                       ),
                     ),
                   ],

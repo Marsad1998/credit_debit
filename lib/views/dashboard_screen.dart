@@ -1,7 +1,7 @@
+import 'package:flutter/material.dart';
+import 'package:credit_debit/utils/constants.dart';
 import 'package:credit_debit/components/dashboard_screen/dashboard_bottom.dart';
 import 'package:credit_debit/components/dashboard_screen/show_customer.dart';
-import 'package:flutter/material.dart';
-import 'package:credit_debit/constants.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key, required this.title});

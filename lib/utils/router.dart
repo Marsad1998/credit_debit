@@ -1,16 +1,28 @@
+import 'package:credit_debit/views/auth_screen.dart';
 import 'package:go_router/go_router.dart';
-import 'package:credit_debit/screens/add_transaction.dart';
-import 'package:credit_debit/screens/customer_screen.dart';
-import 'package:credit_debit/screens/dashboard_screen.dart';
+import 'package:credit_debit/views/pdf_generator.dart';
+import 'package:credit_debit/views/add_transaction.dart';
+import 'package:credit_debit/views/customer_screen.dart';
+import 'package:credit_debit/views/dashboard_screen.dart';
 
 class MyRoutes {
   static GoRouter routes = GoRouter(
     routes: [
       GoRoute(
         path: '/',
+        name: AuthScreen.id,
+        builder: (context, state) => const AuthScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard',
         name: DashboardScreen.id,
         builder: (context, state) =>
-            const DashboardScreen(title: 'Credit Debit'),
+            const DashboardScreen(title: 'Book Keeper'),
+      ),
+      GoRoute(
+        path: '/show_transactions',
+        name: 'show_transactions',
+        builder: (context, state) => const PdfGenerator(),
       ),
       GoRoute(
         path: '/show_customer_transaction',
