@@ -1,6 +1,6 @@
-package com.example.credit_debit
+package pk.sandbox.credit_debit
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity: FlutterFragmentActivity() {
+class MainActivity : FlutterFragmentActivity() {
 }
