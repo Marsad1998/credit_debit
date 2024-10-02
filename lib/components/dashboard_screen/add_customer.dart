@@ -2,7 +2,7 @@ import 'package:credit_debit/models/customer.dart';
 import 'package:credit_debit/viewmodels/customer_state.dart';
 import 'package:credit_debit/utils/constants.dart';
 import 'package:credit_debit/services/customer_services.dart';
-import 'package:credit_debit/utils/notification.dart';
+import 'package:credit_debit/services/notification_services.dart';
 import 'package:credit_debit/widgets/trans_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -73,7 +73,7 @@ class AddCustomer extends StatelessWidget {
                   }
 
                   if (!context.mounted) return; // ver important
-                  Notifications.showNotification(
+                  NotificationServices.showNotification(
                       context, 'Customer Saved Successfully');
                   customerData.refreshCustomers();
                   Navigator.pop(context);

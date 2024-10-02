@@ -1,3 +1,4 @@
+import 'package:credit_debit/services/notification_services.dart';
 import 'package:credit_debit/views/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:credit_debit/services/auth_services.dart';
@@ -30,7 +31,8 @@ class _AuthScreenState extends State<AuthScreen> {
     final hasPin = await authService.hasSetupPin();
     if (hasPin) {
       // If a PIN is set, attempt biometric authentication
-      await _attemptBiometricAuthentication();
+      // await _attemptBiometricAuthentication();
+      _showPinLoginDialog();
     } else {
       // If no PIN, show the registration screen for first-time setup
       _showPinRegistrationDialog();
@@ -74,6 +76,7 @@ class _AuthScreenState extends State<AuthScreen> {
               onPressed: () async {
                 if (_pinController.text.length == 4) {
                   await authService.setPin(_pinController.text);
+                  if (!context.mounted) return;
                   Navigator.of(context).pop();
                   _redirectToDashboard();
                 } else {
@@ -105,19 +108,40 @@ class _AuthScreenState extends State<AuthScreen> {
             maxLength: 4,
           ),
           actions: [
-            TextButton(
-              onPressed: () async {
-                final pinSuccess =
-                    await authService.verifyPin(_pinController.text);
-                if (pinSuccess) {
-                  Navigator.of(context).pop();
-                  _redirectToDashboard();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Invalid PIN')));
-                }
-              },
-              child: const Text('Login'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (AuthService.isSupported())
+                  Container(
+                    margin: const EdgeInsets.only(top: 10.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        _attemptBiometricAuthentication();
+                      },
+                      icon: const Icon(Icons.fingerprint),
+                    ),
+                  ),
+                TextButton(
+                  onPressed: () async {
+                    final pinSuccess =
+                        await authService.verifyPin(_pinController.text);
+
+                    if (!context.mounted) return;
+                    if (pinSuccess) {
+                      Navigator.of(context).pop();
+                      _redirectToDashboard();
+                    } else {
+                      NotificationServices.showNotification(
+                          context, 'Invalid PIN');
+                    }
+                  },
+                  child: const Text('Login'),
+                ),
+              ],
             ),
           ],
         );
@@ -139,12 +163,12 @@ class _AuthScreenState extends State<AuthScreen> {
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
-                await _attemptBiometricAuthentication(); // Attempt biometric again on button press
+                await _checkAuthentication(); // Attempt biometric again on button press
               },
               child: const Row(
                 mainAxisAlignment:
                     MainAxisAlignment.center, // Center items horizontally
-                children: const [
+                children: [
                   Icon(Icons.lock),
                   SizedBox(width: 8.0), // Add spacing between icon and text
                   Text('Access Your Ledger'),

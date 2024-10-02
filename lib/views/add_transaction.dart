@@ -1,5 +1,5 @@
 import 'package:credit_debit/models/transactions.dart';
-import 'package:credit_debit/utils/notification.dart';
+import 'package:credit_debit/services/notification_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -147,6 +147,7 @@ class _AddTransactionState extends State<AddTransaction> {
                       const SizedBox(height: 25),
                       TransField(
                         minL: 5,
+                        mLen: 250,
                         label: 'Notes (Optional)',
                         icon: const Icon(Icons.edit_note),
                         controller: noteController,
@@ -214,7 +215,7 @@ class _AddTransactionState extends State<AddTransaction> {
 
                             reloadProvider();
                             if (!context.mounted) return; // very important
-                            Notifications.showNotification(
+                            NotificationServices.showNotification(
                                 context, 'Transaction Saved Successfully');
                             context.pop();
                           }

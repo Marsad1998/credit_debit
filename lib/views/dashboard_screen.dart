@@ -1,3 +1,4 @@
+import 'package:credit_debit/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:credit_debit/utils/constants.dart';
 import 'package:credit_debit/components/dashboard_screen/dashboard_bottom.dart';
@@ -23,6 +24,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: Colors.lightBlueAccent,
         title: Text(widget.title),
       ),
+      drawer: const AppDrawer(),
       body: SafeArea(
         child: Column(
           children: [

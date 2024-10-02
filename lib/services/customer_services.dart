@@ -1,7 +1,7 @@
 import 'package:credit_debit/models/customer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart' as sql;
-import 'package:credit_debit/utils/db_connect.dart';
+import 'package:credit_debit/views/db_connect.dart';
 
 class CustomerService {
   static Future<int> createCustomer(Customer customer) async {

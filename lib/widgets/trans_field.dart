@@ -12,6 +12,7 @@ class TransField extends StatelessWidget {
     this.keyBoardType,
     this.autofocus = false,
     this.inputFormatters,
+    this.mLen,
   });
 
   final String label;
@@ -22,6 +23,7 @@ class TransField extends StatelessWidget {
   final TextInputType? keyBoardType;
   final bool autofocus;
   final List<TextInputFormatter>? inputFormatters;
+  final int? mLen;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,7 @@ class TransField extends StatelessWidget {
         autofocus: autofocus,
         minLines: minL,
         maxLines: null,
+        maxLength: mLen,
         keyboardType: keyBoardType,
         controller: controller,
         validator: callBackFunction,

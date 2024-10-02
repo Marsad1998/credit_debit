@@ -1,21 +1,27 @@
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PdfServices {
   static Future<File> savePdf(
       {required String name, required Document pdf}) async {
-    final root = Platform.isAndroid
-        ? await getExternalStorageDirectory()
-        : await getApplicationDocumentsDirectory();
+    // final root = Platform.isAndroid
+    //     ? await getExternalStorageDirectory()
+    //     : await getApplicationDocumentsDirectory();
 
-    final file = File('${root!.path}/$name');
-    await file.writeAsBytes(await pdf.save());
-    debugPrint('${root.path}/$name');
-    return file;
+    final Directory? downloadsDir = await getDownloadsDirectory();
+
+    if (downloadsDir != null) {
+      final file = File('${downloadsDir.path}/$name');
+      await file.writeAsBytes(await pdf.save());
+      // debugPrint('Saved PDF to: ${downloadsDir.path}/$name');
+
+      return file;
+    } else {
+      throw Exception('Could not find the Downloads directory.');
+    }
   }
 
   static Future<void> openPdf(File file) async {

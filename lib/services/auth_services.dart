@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:local_auth_android/local_auth_android.dart'
-    show AndroidAuthMessages, AuthMessages;
-import 'package:local_auth_darwin/local_auth_darwin.dart'
-    show AuthMessages, IOSAuthMessages;
+import 'package:local_auth_android/local_auth_android.dart';
+import 'package:local_auth_darwin/local_auth_darwin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   final LocalAuthentication _auth = LocalAuthentication();
+
+  static bool _isSupported = false;
+
+  AuthService() {
+    _initializeSupportStatus();
+  }
+
+  Future<void> _initializeSupportStatus() async {
+    _isSupported = await _auth.isDeviceSupported();
+  }
+
+  static bool isSupported() {
+    return _isSupported;
+  }
 
   Future<bool> _canAuthenticate() async =>
       await _auth.canCheckBiometrics || await _auth.isDeviceSupported();

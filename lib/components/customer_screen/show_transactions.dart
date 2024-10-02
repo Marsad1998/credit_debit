@@ -89,10 +89,13 @@ class _ShowTransactionsState extends State<ShowTransactions> {
                 scrollDirection: Axis.vertical,
                 itemBuilder: (builder, index) {
                   final trans = transData.transaction[index];
-                  final DateTime createdAt = DateTime.parse(trans['date']);
-                  final String formattedDate =
-                      DateFormat('dd MMMM yyyy EEEE (h:mm a)')
-                          .format(createdAt);
+                  final String timeStamp = DateFormat('EEE, dd MMM yyyy')
+                      .format(DateTime.parse(trans['date']));
+                  final String dueDate = DateFormat('EEE, dd MMM yyyy')
+                      .format(DateTime.parse(trans['dueDate']));
+                  final bool isDueDatePassed =
+                      DateTime.parse(trans['dueDate']).isBefore(DateTime.now());
+
                   double totalBalance =
                       calculateBalance(trans['paid'], trans['received']);
                   return InkWell(
@@ -107,59 +110,94 @@ class _ShowTransactionsState extends State<ShowTransactions> {
                       );
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 16.0),
+                      color: Colors.grey[300],
                       margin: const EdgeInsets.symmetric(vertical: 2.5),
-                      color: Colors.white,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(
-                                flex: 2,
-                                child: Text(formattedDate),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  trans['received'] > 0
-                                      ? trans['received'].toStringAsFixed(2)
-                                      : '',
-                                  style: TextStyle(color: Colors.green[800]),
-                                  textAlign: TextAlign.center,
+                              if (isDueDatePassed)
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red[500],
                                 ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  trans['paid'] > 0
-                                      ? trans['paid'].toStringAsFixed(2)
-                                      : '',
-                                  style: TextStyle(color: Colors.red[600]),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  totalBalance.toStringAsFixed(2),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color:
-                                        Transaction.balanceColor(totalBalance),
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                              Text(
+                                ' Due Date: $dueDate',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                  color: Colors.grey[900],
                                 ),
                               ),
                             ],
                           ),
-                          if (trans['note'] != null &&
-                              trans['note'].toString().isNotEmpty)
-                            Text(
-                              trans['note'],
-                              style: TextStyle(
-                                color: Colors.redAccent[400],
-                                fontWeight: FontWeight.w600,
-                              ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0, vertical: 16.0),
+                            margin: const EdgeInsets.symmetric(vertical: 2.5),
+                            color: Colors.white,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(timeStamp),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        trans['received'] > 0
+                                            ? trans['received']
+                                                .toStringAsFixed(2)
+                                            : '',
+                                        style:
+                                            TextStyle(color: Colors.green[800]),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        trans['paid'] > 0
+                                            ? trans['paid'].toStringAsFixed(2)
+                                            : '',
+                                        style:
+                                            TextStyle(color: Colors.red[600]),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        totalBalance.toStringAsFixed(2),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Transaction.balanceColor(
+                                              totalBalance),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (trans['note'] != null &&
+                                    trans['note'].toString().isNotEmpty)
+                                  Text(
+                                    trans['note'],
+                                    style: TextStyle(
+                                      color: Colors.redAccent[400],
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                              ],
                             ),
+                          ),
                         ],
                       ),
                     ),

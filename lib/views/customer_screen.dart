@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:credit_debit/components/customer_screen/customer_bottom.dart';
 import 'package:credit_debit/components/customer_screen/show_transactions.dart';
 import 'package:credit_debit/services/pdf_services.dart';
@@ -7,24 +6,23 @@ import 'package:credit_debit/viewmodels/transaction_state.dart';
 import 'package:credit_debit/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:pdf/widgets.dart' as pw;
 
 class CustomerScreen extends StatelessWidget {
   const CustomerScreen({super.key, required this.customer});
   final Map<String, dynamic> customer;
   static String id = 'customer_screen';
 
-  Future<void> generatePDF() async {
-    final pdf = pw.Document();
-    pw.Page(
-      build: (pw.Context context) => pw.Center(
-        child: pw.Text('Hello World'),
-      ),
-    );
-
-    final file = File('example.pdf');
-    await file.writeAsBytes(await pdf.save());
-  }
+  // Future<void> generatePDF() async {
+  //   final pdf = pw.Document();
+  //   pw.Page(
+  //     build: (pw.Context context) => pw.Center(
+  //       child: pw.Text('Hello World'),
+  //     ),
+  //   );
+  //
+  //   final file = File('example.pdf');
+  //   await file.writeAsBytes(await pdf.save());
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +46,10 @@ class CustomerScreen extends StatelessWidget {
                   final pdfView = await PdfServices.allTransactionPdf(
                       transactions, customer['name'], 'All Transactions');
                   PdfServices.openPdf(pdfView);
+
+                  // print(pdfView.path);
+                  // Notifications.showNotification(
+                  //     context, Text('PDF downloaded: ${pdfView.path}'));
                 },
                 icon: const Icon(Icons.picture_as_pdf))
           ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart' as sql;
-import 'package:credit_debit/utils/db_connect.dart';
+import 'package:credit_debit/views/db_connect.dart';
 import 'package:credit_debit/models/transactions.dart';
 
 class TransactionService {

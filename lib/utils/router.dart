@@ -1,4 +1,5 @@
 import 'package:credit_debit/views/auth_screen.dart';
+import 'package:credit_debit/views/settings_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:credit_debit/views/pdf_generator.dart';
 import 'package:credit_debit/views/add_transaction.dart';
@@ -17,7 +18,12 @@ class MyRoutes {
         path: '/dashboard',
         name: DashboardScreen.id,
         builder: (context, state) =>
-            const DashboardScreen(title: 'Book Keeper'),
+            const DashboardScreen(title: 'Smart Records'),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: Settings.id,
+        builder: (context, state) => const Settings(),
       ),
       GoRoute(
         path: '/show_transactions',
